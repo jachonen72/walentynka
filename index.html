@@ -14,7 +14,6 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            /* Romantyczny gradient */
             background: linear-gradient(135deg, #ff9a9e 0%, #ff758c 100%);
             overflow: hidden;
             font-family: 'Poppins', sans-serif;
@@ -26,11 +25,7 @@
             background: transparent;
             padding: 20px;
             width: 100%;
-            max-width: 600px; /* Ograniczenie szerokości */
             position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Wyśrodkowanie elementów wewnątrz */
         }
 
         h1 {
@@ -41,17 +36,15 @@
             text-shadow: 0 5px 15px rgba(168, 50, 50, 0.4);
             font-weight: normal;
             line-height: 1.4;
-            width: 100%;
         }
 
-        /* Kontener na przyciski - tu dzieje się magia środkowania */
+        /* --- TU JEST ZMIANA: Flexbox trzyma przyciski razem --- */
         .buttons {
             display: flex;
-            justify-content: center;
+            justify-content: center; /* Idealnie na środku */
             align-items: center;
-            width: 100%;
-            height: 60px; /* Rezerwujemy miejsce */
-            position: relative; /* Ważne dla pozycjonowania absolutnego */
+            gap: 20px; /* Stały odstęp 20 pikseli między przyciskami */
+            min-height: 80px;
         }
 
         button {
@@ -64,7 +57,7 @@
             cursor: pointer;
             font-weight: 600;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            transition: left 0.6s ease-out, top 0.6s ease-out, transform 0.2s; 
+            transition: transform 0.2s; /* Usunąłem transition dla left/top, żeby nie było opóźnienia przy starcie ucieczki */
             letter-spacing: 1px;
             text-transform: uppercase;
         }
@@ -77,18 +70,14 @@
             background-color: #ffffff;
             color: #ff4757;
             z-index: 101;
-            /* Przycisk TAK nie jest absolutny, on "trzyma" środek */
-            position: relative; 
-            /* Przesuwamy go lekko w lewo, żeby zrobić miejsce dla NIE */
-            margin-right: 15px; 
         }
         
         #noBtn {
             background-color: #ff4757;
             color: #ffffff;
             border: 2px solid #ffffff;
-            position: absolute;
             z-index: 100;
+            position: relative; /* Na starcie jest "zwykłym" przyciskiem */
         }
 
         /* Pływające serduszka */
@@ -148,34 +137,11 @@
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
 
+        // Zmienna sprawdzająca, czy przycisk już zaczął uciekać
+        let isRunning = false;
         let currentX = 0;
         let currentY = 0;
 
-        function initNoBtn() {
-            const yesRect = yesBtn.getBoundingClientRect();
-            
-            // --- POZYCJONOWANIE NA START ---
-            // Ustawiamy przycisk NIE dokładnie 15px na prawo od przycisku TAK
-            currentX = yesRect.right + 15; 
-            currentY = yesRect.top;
-            
-            // Ponieważ NIE jest "absolute", musimy mu podać dokładne koordynaty
-            noBtn.style.left = currentX + 'px';
-            noBtn.style.top = currentY + 'px';
-        }
-        
-        // Uruchomienie pozycjonowania po załadowaniu strony
-        window.onload = () => {
-            initNoBtn();
-            // Czasem czcionki ładują się dłużej i przesuwają elementy,
-            // więc dla pewności poprawiamy pozycję po ułamku sekundy
-            setTimeout(initNoBtn, 100);
-            setTimeout(initNoBtn, 500);
-        };
-        
-        window.onresize = initNoBtn;
-
-        // --- Logika uciekania ---
         document.addEventListener('mousemove', (e) => {
             const mouseX = e.clientX;
             const mouseY = e.clientY;
@@ -184,12 +150,27 @@
             const btnCenterY = btnRect.top + btnRect.height / 2;
             const distance = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
 
-            // Reaguje z odległości 200px
+            // Jeśli myszka jest blisko (200px)
             if (distance < 200) {
+                // Jeśli to pierwszy raz, gdy myszka się zbliża:
+                if (!isRunning) {
+                    isRunning = true;
+                    // Przełączamy przycisk w tryb absolutny w tym samym miejscu, w którym był
+                    currentX = btnRect.left;
+                    currentY = btnRect.top;
+                    noBtn.style.position = 'fixed'; // Używamy fixed, żeby łatwiej sterować
+                    noBtn.style.left = currentX + 'px';
+                    noBtn.style.top = currentY + 'px';
+                    // Dodajemy płynność ruchu dopiero TERAZ, żeby nie odleciał przy ładowaniu
+                    noBtn.style.transition = 'left 0.8s ease-out, top 0.8s ease-out';
+                }
+
+                // Logika uciekania
                 const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
                 currentX += Math.cos(angle) * 300;
                 currentY += Math.sin(angle) * 300;
                 
+                // Odbijanie od ścian
                 if (currentX < 50) currentX = window.innerWidth - 200;
                 if (currentX > window.innerWidth - 100) currentX = 50;
                 if (currentY < 50) currentY = window.innerHeight - 100;
@@ -203,7 +184,7 @@
         function celebrate() {
             const title = document.getElementById('mainTitle');
             title.style.fontFamily = "'Pacifico', cursive";
-            title.innerHTML = "Oł jeeeaa! ❤️";
+            title.innerHTML = "Oł jeeaa! ❤️";
             title.style.fontSize = "4.5rem";
             
             noBtn.style.display = 'none';
@@ -222,7 +203,7 @@
                     },
                     events: {
                         'onReady': function(event) {
-                            event.target.setVolume(25); // Głośność 25%
+                            event.target.setVolume(25); 
                             event.target.playVideo();
                         }
                     }
