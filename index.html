@@ -25,26 +25,33 @@
             z-index: 100;
             background: transparent;
             padding: 20px;
-            max-width: 90%;
+            width: 100%;
+            max-width: 600px; /* Ograniczenie szerokości */
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Wyśrodkowanie elementów wewnątrz */
         }
 
         h1 {
             font-family: 'Pacifico', cursive;
             color: #ffffff;
             font-size: 3rem;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             text-shadow: 0 5px 15px rgba(168, 50, 50, 0.4);
             font-weight: normal;
             line-height: 1.4;
+            width: 100%;
         }
 
+        /* Kontener na przyciski - tu dzieje się magia środkowania */
         .buttons {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 80px;
-            /* Brak gap w CSS, bo pozycjonujemy JS-em absolutnie */
+            width: 100%;
+            height: 60px; /* Rezerwujemy miejsce */
+            position: relative; /* Ważne dla pozycjonowania absolutnego */
         }
 
         button {
@@ -70,6 +77,10 @@
             background-color: #ffffff;
             color: #ff4757;
             z-index: 101;
+            /* Przycisk TAK nie jest absolutny, on "trzyma" środek */
+            position: relative; 
+            /* Przesuwamy go lekko w lewo, żeby zrobić miejsce dla NIE */
+            margin-right: 15px; 
         }
         
         #noBtn {
@@ -143,18 +154,28 @@
         function initNoBtn() {
             const yesRect = yesBtn.getBoundingClientRect();
             
-            // --- TUTAJ ZMIANA: PRZYCISKI BARDZO BLISKO ---
-            // Tylko 10 pikseli odstępu od przycisku TAK
-            currentX = yesRect.right + 10; 
+            // --- POZYCJONOWANIE NA START ---
+            // Ustawiamy przycisk NIE dokładnie 15px na prawo od przycisku TAK
+            currentX = yesRect.right + 15; 
             currentY = yesRect.top;
             
+            // Ponieważ NIE jest "absolute", musimy mu podać dokładne koordynaty
             noBtn.style.left = currentX + 'px';
             noBtn.style.top = currentY + 'px';
         }
         
-        window.onload = initNoBtn;
+        // Uruchomienie pozycjonowania po załadowaniu strony
+        window.onload = () => {
+            initNoBtn();
+            // Czasem czcionki ładują się dłużej i przesuwają elementy,
+            // więc dla pewności poprawiamy pozycję po ułamku sekundy
+            setTimeout(initNoBtn, 100);
+            setTimeout(initNoBtn, 500);
+        };
+        
         window.onresize = initNoBtn;
 
+        // --- Logika uciekania ---
         document.addEventListener('mousemove', (e) => {
             const mouseX = e.clientX;
             const mouseY = e.clientY;
@@ -163,13 +184,12 @@
             const btnCenterY = btnRect.top + btnRect.height / 2;
             const distance = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
 
-            // Reaguje z odległości 200px (5cm)
+            // Reaguje z odległości 200px
             if (distance < 200) {
                 const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
                 currentX += Math.cos(angle) * 300;
                 currentY += Math.sin(angle) * 300;
                 
-                // Odbijanie od ścian
                 if (currentX < 50) currentX = window.innerWidth - 200;
                 if (currentX > window.innerWidth - 100) currentX = 50;
                 if (currentY < 50) currentY = window.innerHeight - 100;
@@ -180,11 +200,10 @@
             }
         });
 
-        // --- FUNKCJA Z MUZYKĄ ---
         function celebrate() {
             const title = document.getElementById('mainTitle');
             title.style.fontFamily = "'Pacifico', cursive";
-            title.innerHTML = "OOOŁŁŁ JEEEAAA! ❤️";
+            title.innerHTML = "Oł jeeeaa! ❤️";
             title.style.fontSize = "4.5rem";
             
             noBtn.style.display = 'none';
@@ -198,7 +217,7 @@
                     playerVars: {
                         'autoplay': 1,
                         'controls': 0,
-                        'start': 3, // START OD 3 SEKUNDY
+                        'start': 3, // Start od 3 sekundy
                         'loop': 1
                     },
                     events: {
@@ -210,7 +229,6 @@
                 });
             }
 
-            // Fajerwerki
             for(let i=0; i<400; i++) {
                 setTimeout(createFirework, i * 8);
             }
