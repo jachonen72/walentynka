@@ -37,7 +37,6 @@
             text-shadow: 0 5px 15px rgba(168, 50, 50, 0.4);
             font-weight: normal;
             line-height: 1.4;
-            transition: opacity 0.5s;
         }
 
         .buttons {
@@ -45,7 +44,7 @@
             justify-content: center;
             align-items: center;
             min-height: 80px;
-            gap: 20px; /* Przyciski blisko siebie */
+            /* Brak gap w CSS, bo pozycjonujemy JS-em absolutnie */
         }
 
         button {
@@ -143,14 +142,12 @@
 
         function initNoBtn() {
             const yesRect = yesBtn.getBoundingClientRect();
-            // Przycisk NIE bardzo blisko TAK (tylko 20px)
-            currentX = yesRect.right + 20; 
+            
+            // --- TUTAJ ZMIANA: PRZYCISKI BARDZO BLISKO ---
+            // Tylko 10 pikseli odstępu od przycisku TAK
+            currentX = yesRect.right + 10; 
             currentY = yesRect.top;
             
-            if (window.innerWidth < 600) {
-                currentX = yesRect.left;
-                currentY = yesRect.bottom + 15; 
-            }
             noBtn.style.left = currentX + 'px';
             noBtn.style.top = currentY + 'px';
         }
@@ -166,11 +163,13 @@
             const btnCenterY = btnRect.top + btnRect.height / 2;
             const distance = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
 
+            // Reaguje z odległości 200px (5cm)
             if (distance < 200) {
                 const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
                 currentX += Math.cos(angle) * 300;
                 currentY += Math.sin(angle) * 300;
                 
+                // Odbijanie od ścian
                 if (currentX < 50) currentX = window.innerWidth - 200;
                 if (currentX > window.innerWidth - 100) currentX = 50;
                 if (currentY < 50) currentY = window.innerHeight - 100;
@@ -181,17 +180,16 @@
             }
         });
 
-        // --- ZMIENIONA FUNKCJA Z MUZYKĄ ---
+        // --- FUNKCJA Z MUZYKĄ ---
         function celebrate() {
             const title = document.getElementById('mainTitle');
             title.style.fontFamily = "'Pacifico', cursive";
-            title.innerHTML = "Oł jeeeaa! ❤️";
+            title.innerHTML = "OOOŁŁŁ JEEEAAA! ❤️";
             title.style.fontSize = "4.5rem";
             
             noBtn.style.display = 'none';
             yesBtn.style.display = 'none';
 
-            // Uruchamiamy odtwarzacz YouTube przez API
             if (typeof YT !== 'undefined' && YT && YT.Player) {
                 new YT.Player('youtube-player', {
                     height: '0',
@@ -200,13 +198,12 @@
                     playerVars: {
                         'autoplay': 1,
                         'controls': 0,
-                        'start': 2, // Start od 2 sekundy
+                        'start': 3, // START OD 3 SEKUNDY
                         'loop': 1
                     },
                     events: {
                         'onReady': function(event) {
-                            // --- TUTAJ USTAWIANA JEST GŁOŚNOŚĆ ---
-                            event.target.setVolume(25); // 25% głośności
+                            event.target.setVolume(25); // Głośność 25%
                             event.target.playVideo();
                         }
                     }
