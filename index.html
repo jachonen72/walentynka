@@ -12,7 +12,8 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: white;
+            /* Zmieniamy tło na lekko różowe/czerwone, żeby nie było takie białe */
+            background: linear-gradient(to bottom, #ffe6e6, #ffcccc);
             overflow: hidden;
             font-family: 'Segoe UI', sans-serif;
         }
@@ -20,58 +21,62 @@
         .container {
             text-align: center;
             z-index: 10;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.85); /* Bardziej przezroczyste tło */
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 2px solid #ff7675; /* Czerwona ramka */
         }
 
         h1 {
             color: #d63031;
-            font-size: 2rem;
+            font-size: 2.5rem;
             margin-bottom: 40px;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.5);
         }
 
         .buttons {
             display: flex;
             justify-content: center;
-            /* Usunąłem relative, żeby przycisk NIE był niezależny od pudełka */
             min-height: 80px;
         }
 
         button {
-            padding: 12px 35px;
-            font-size: 1.2rem;
+            padding: 15px 0; /* Padding góra/dół */
+            width: 150px;    /* SZTYWNA SZEROKOŚĆ - żeby były równe */
+            font-size: 1.3rem;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             font-weight: bold;
-            
-            /* Płynna ucieczka (0.5 sekundy - wystarczająco szybko, by uciec z 5cm) */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            /* Płynna ucieczka przycisku NIE */
             transition: left 0.5s ease-out, top 0.5s ease-out;
         }
 
         #yesBtn {
             background-color: #2ecc71;
             color: white;
-            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
-            z-index: 101; /* Przycisk TAK zawsze na wierzchu */
+            z-index: 101;
+            /* Żeby stał stabilnie w miejscu, ale był ładnie wycentrowany */
+            margin-right: 0; 
         }
 
         #noBtn {
             background-color: #e74c3c;
             color: white;
-            position: absolute; /* Całkowicie wolny, może być gdziekolwiek */
+            position: absolute; /* Uciekinier */
             z-index: 100;
         }
 
+        /* Tło - dużo serduszek */
         .heart {
             position: absolute;
             color: #ff7675;
             font-size: 20px;
             pointer-events: none;
             animation: pulse 2s infinite ease-in-out;
-            opacity: 0.5;
+            opacity: 0.6;
         }
 
         @keyframes pulse {
@@ -81,15 +86,20 @@
         
         .firework {
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 999;
+            z-index: 9999; /* Bardzo wysoko, nad wszystkim */
         }
     </style>
 </head>
 <body>
+
+    <iframe id="bgMusic" style="display:none" 
+        src="https://www.youtube.com/embed/yo_Ph9GQjWw?autoplay=1&loop=1&playlist=yo_Ph9GQjWw" 
+        allow="autoplay">
+    </iframe>
 
     <div class="container">
         <h1 id="mainTitle">Będziesz moją walentynką,<br>jak wyzdrowiejesz? ❤️</h1>
@@ -100,29 +110,47 @@
     </div>
 
     <script>
-        // Tło
-        for (let i = 0; i < 40; i++) {
+        // --- TŁO: DUŻO WIĘCEJ SERDUSZEK (150 sztuk) ---
+        for (let i = 0; i < 150; i++) {
             const heart = document.createElement('div');
             heart.className = 'heart';
             heart.innerHTML = '❤️';
             heart.style.left = Math.random() * 100 + 'vw';
             heart.style.top = Math.random() * 100 + 'vh';
+            // Losowa wielkość serduszek dla lepszego efektu
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px'; 
+            heart.style.animationDelay = Math.random() * 2 + 's';
             document.body.appendChild(heart);
         }
 
         const noBtn = document.getElementById('noBtn');
-        
-        // --- POZYCJA STARTOWA ---
-        // Ustawiamy go daleko od przycisku TAK (np. 150 pikseli w prawo i 100 w dół)
-        let currentX = window.innerWidth / 2 + 150; 
-        let currentY = window.innerHeight / 2 + 100; 
+        const yesBtn = document.getElementById('yesBtn');
 
-        // Funkcja aktualizująca pozycję
-        function updateBtnPosition() {
+        // --- POZYCJONOWANIE PRZYCISKÓW ---
+        // Ustawiamy przycisk NIE w pewnej odległości od TAK
+        // Żeby wyglądały na równe, pobieramy pozycję TAK i przesuwamy NIE
+        
+        let currentX = 0;
+        let currentY = 0;
+
+        function initNoBtn() {
+            const yesRect = yesBtn.getBoundingClientRect();
+            // Ustaw NIE około 200px na prawo od TAK (jeśli się zmieści)
+            currentX = yesRect.right + 100;
+            currentY = yesRect.top;
+            
+            // Jeśli ekran jest mały (telefon), daj go pod spód
+            if (window.innerWidth < 600) {
+                currentX = yesRect.left;
+                currentY = yesRect.bottom + 50;
+            }
+
             noBtn.style.left = currentX + 'px';
             noBtn.style.top = currentY + 'px';
         }
-        updateBtnPosition(); // Ustawienie na start
+        
+        // Czekamy chwilę aż strona się załaduje, żeby dobrze pobrać pozycje
+        window.onload = initNoBtn;
 
         document.addEventListener('mousemove', (e) => {
             const mouseX = e.clientX;
@@ -134,46 +162,55 @@
 
             const distance = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
 
-            // --- STREFA OCHRONNA 5 CM ---
-            // 5 cm to około 190-200 pikseli na typowym ekranie.
-            // Jeśli myszka jest bliżej niż 200px -> UCIEKAJ!
+            // --- STREFA OCHRONNA 5 CM (ok. 200px) ---
             if (distance < 200) {
                 const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
                 
-                // Przesuń się o 250 pikseli (zdecydowany ruch)
-                currentX += Math.cos(angle) * 250;
-                currentY += Math.sin(angle) * 250;
+                // Ucieczka o 300px
+                currentX += Math.cos(angle) * 300;
+                currentY += Math.sin(angle) * 300;
 
                 // Odbijanie od ścian
-                if (currentX < 50) currentX = window.innerWidth - 150;
+                if (currentX < 50) currentX = window.innerWidth - 200;
                 if (currentX > window.innerWidth - 100) currentX = 50;
                 if (currentY < 50) currentY = window.innerHeight - 100;
                 if (currentY > window.innerHeight - 50) currentY = 50;
 
-                updateBtnPosition();
+                noBtn.style.left = currentX + 'px';
+                noBtn.style.top = currentY + 'px';
             }
         });
 
         function celebrate() {
-            document.getElementById('mainTitle').innerHTML = "Wiedziałem! ❤️<br>Szybko wracaj do zdrowia!";
-            noBtn.style.display = 'none';
+            // Zmiana napisu
+            const title = document.getElementById('mainTitle');
+            title.innerHTML = "oł jeeeaa ❤️";
+            title.style.fontSize = "4rem"; // Powiększamy napis
             
-            // Fajerwerki
-            for(let i=0; i<100; i++) {
-                setTimeout(createFirework, i * 15);
+            noBtn.style.display = 'none';
+            yesBtn.style.display = 'none'; // Ukrywamy też przycisk TAK po kliknięciu
+            
+            // --- FAJERWERKI NA CAŁYM EKRANIE ---
+            // Tworzymy ich dużo (300) i w losowych miejscach
+            for(let i=0; i<300; i++) {
+                setTimeout(createFirework, i * 10);
             }
         }
         
         function createFirework() {
             const f = document.createElement('div');
             f.className = 'firework';
-            f.style.backgroundColor = ['#e84393', '#fdcb6e', '#00cec9', '#d63031'][Math.floor(Math.random()*4)];
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            f.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             document.body.appendChild(f);
             
-            const startX = window.innerWidth/2;
-            const startY = window.innerHeight/2;
+            // Start w losowym miejscu na dole lub środku
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+            
+            // Kierunek wybuchu
             const angle = Math.random() * Math.PI * 2;
-            const dist = 50 + Math.random() * 250;
+            const dist = 100 + Math.random() * 400; // Duży rozrzut
             
             const destX = startX + Math.cos(angle) * dist;
             const destY = startY + Math.sin(angle) * dist;
@@ -184,7 +221,7 @@
             f.animate([
                 { transform: 'translate(0,0) scale(1)', opacity: 1 },
                 { transform: `translate(${destX - startX}px, ${destY - startY}px) scale(0)`, opacity: 0 }
-            ], { duration: 1000 + Math.random()*500 }).onfinish = () => f.remove();
+            ], { duration: 1000 + Math.random() * 1000 }).onfinish = () => f.remove();
         }
     </script>
 </body>
