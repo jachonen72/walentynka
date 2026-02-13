@@ -13,20 +13,22 @@
             align-items: center;
             height: 100vh;
             /* Czerwone tło (gradient) */
-            background: linear-gradient(to bottom, #ff9999, #ff4d4d);
+            background: linear-gradient(to bottom, #ff9999, #ff3333);
             overflow: hidden;
             font-family: 'Segoe UI', sans-serif;
         }
 
         .container {
             text-align: center;
-            z-index: 100; /* Musi być na wierzchu */
+            z-index: 100;
             background: rgba(255, 255, 255, 0.9);
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 10px 50px rgba(0,0,0,0.3);
             border: 4px solid #d63031;
             max-width: 90%;
+            /* Płynne znikanie tła */
+            transition: background 0.5s, border 0.5s, box-shadow 0.5s;
         }
 
         h1 {
@@ -37,6 +39,12 @@
             transition: all 0.5s ease;
         }
 
+        /* Klasa, którą dodamy po kliknięciu, żeby zmienić kolor napisu na biały/jasny */
+        h1.white-text {
+            color: #fff;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
         .buttons {
             display: flex;
             justify-content: center;
@@ -45,14 +53,13 @@
 
         button {
             padding: 15px 0;
-            width: 160px;    /* SZTYWNA SZEROKOŚĆ - oba przyciski są identyczne */
+            width: 160px;
             font-size: 1.3rem;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            /* Płynna, powolna ucieczka */
             transition: left 0.8s ease-out, top 0.8s ease-out; 
         }
 
@@ -60,7 +67,6 @@
             background-color: #2ecc71;
             color: white;
             z-index: 101;
-            margin-right: 0; 
         }
 
         #noBtn {
@@ -70,10 +76,10 @@
             z-index: 100;
         }
 
-        /* Styl serduszek w tle */
+        /* Serduszka w tle */
         .heart {
             position: absolute;
-            color: #8b0000; /* Ciemna krwista czerwień */
+            color: #8b0000;
             pointer-events: none;
             animation: pulse 3s infinite ease-in-out;
             opacity: 0.6;
@@ -85,13 +91,16 @@
             50% { transform: scale(1.3); }
         }
         
+        /* ULEPSZONE FAJERWERKI */
         .firework {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 12px; /* Większe kropki */
+            height: 12px;
             border-radius: 50%;
             pointer-events: none;
             z-index: 9999;
+            /* Efekt świecenia */
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
         }
     </style>
 </head>
@@ -102,7 +111,7 @@
         allow="autoplay">
     </iframe>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <h1 id="mainTitle">Będziesz moją walentynką,<br>jak wyzdrowiejesz? ❤️</h1>
         <div class="buttons">
             <button id="yesBtn" onclick="celebrate()">TAK!</button>
@@ -111,14 +120,13 @@
     </div>
 
     <script>
-        // --- TŁO: 200 SERDUSZEK ---
-        for (let i = 0; i < 200; i++) {
+        // --- TŁO: 400 SERDUSZEK ---
+        for (let i = 0; i < 400; i++) {
             const heart = document.createElement('div');
             heart.className = 'heart';
             heart.innerHTML = '❤️';
             heart.style.left = Math.random() * 100 + 'vw';
             heart.style.top = Math.random() * 100 + 'vh';
-            // Różne rozmiary
             heart.style.fontSize = (Math.random() * 30 + 10) + 'px'; 
             heart.style.animationDelay = Math.random() * 5 + 's';
             document.body.appendChild(heart);
@@ -127,17 +135,15 @@
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
 
-        // Ustawienie początkowe przycisku NIE (z dala od TAK)
+        // Ustawienie początkowe przycisku NIE
         let currentX = 0;
         let currentY = 0;
 
         function initNoBtn() {
             const yesRect = yesBtn.getBoundingClientRect();
-            // Ustawiamy go daleko
             currentX = yesRect.right + 150;
             currentY = yesRect.top;
             
-            // Wersja na telefon (pod spodem)
             if (window.innerWidth < 600) {
                 currentX = yesRect.left;
                 currentY = yesRect.bottom + 80;
@@ -149,7 +155,7 @@
         
         window.onload = initNoBtn;
 
-        // --- Logika uciekania (zasięg 5 cm / 200px) ---
+        // --- Logika uciekania ---
         document.addEventListener('mousemove', (e) => {
             const mouseX = e.clientX;
             const mouseY = e.clientY;
@@ -160,15 +166,12 @@
 
             const distance = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
 
-            // Reaguj z daleka (200px)
             if (distance < 200) {
                 const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
                 
-                // Powolna ucieczka o duży kawałek (300px)
                 currentX += Math.cos(angle) * 300;
                 currentY += Math.sin(angle) * 300;
 
-                // Odbijanie od krawędzi ekranu
                 if (currentX < 50) currentX = window.innerWidth - 200;
                 if (currentX > window.innerWidth - 100) currentX = 50;
                 if (currentY < 50) currentY = window.innerHeight - 100;
@@ -180,29 +183,36 @@
         });
 
         function celebrate() {
-            // Zmiana napisu na "oł jeeeaa"
+            // Zmiana napisu
             const title = document.getElementById('mainTitle');
-            title.innerHTML = "OŁ JEEAAA !!!!❤️";
-            title.style.fontSize = "4rem"; // Powiększenie napisu
+            title.innerHTML = "oł jeeeaa ❤️";
+            title.style.fontSize = "4rem";
+            title.classList.add('white-text'); // Dodajemy styl dla białego napisu
             
+            // UKRYWANIE TŁA KONTENERA (zrobienie go przezroczystym)
+            const container = document.getElementById('mainContainer');
+            container.style.background = "transparent";
+            container.style.border = "none";
+            container.style.boxShadow = "none";
+
             // Ukrycie przycisków
             noBtn.style.display = 'none';
             yesBtn.style.display = 'none';
             
             // --- FAJERWERKI NA CAŁYM EKRANIE ---
-            for(let i=0; i<300; i++) {
-                setTimeout(createFirework, i * 10);
+            for(let i=0; i<400; i++) { // Zwiększona ilość do 400
+                setTimeout(createFirework, i * 8);
             }
         }
         
         function createFirework() {
             const f = document.createElement('div');
             f.className = 'firework';
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#ffffff'];
+            // Bardziej jaskrawe kolory
+            const colors = ['#fff', '#ffeb3b', '#00e5ff', '#ff4081', '#76ff03'];
             f.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             document.body.appendChild(f);
             
-            // Losowe miejsce startu na całym ekranie
             const startX = Math.random() * window.innerWidth;
             const startY = Math.random() * window.innerHeight;
             
