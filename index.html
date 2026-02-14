@@ -181,7 +181,6 @@
                 currentX += Math.cos(angle) * moveDist;
                 currentY += Math.sin(angle) * moveDist;
                 
-                // Odbijanie od ścian
                 const margin = 50;
                 const maxX = window.innerWidth - margin - noBtnVal.offsetWidth;
                 const maxY = window.innerHeight - margin - noBtnVal.offsetHeight;
@@ -226,32 +225,44 @@
             triggerFireworks();
         }
 
-        // --- KONFIGURACJA MUZYKI ---
+        // --- KONFIGURACJA PLAYLISTY ---
+        // Lista utworów (ID z YouTube)
+        const playlist = [
+            'U-l4ya3ejko', // 1. Empire of the Sun
+            '-0QiCWGmBcw', // 2. The Weeknd
+            'tfSS1e3kYeo'  // 3. Capital Cities
+        ];
+        let currentSongIndex = 0; // Zaczynamy od piosenki nr 0 (pierwszej)
+
         function startMusic() {
             if (typeof YT !== 'undefined' && YT && YT.Player) {
                 new YT.Player('youtube-player', {
                     height: '0',
                     width: '0',
-                    // Startujemy od "Walking On A Dream"
-                    videoId: 'U-l4ya3ejko', 
+                    videoId: playlist[currentSongIndex], 
                     playerVars: {
                         'autoplay': 1,
                         'controls': 0,
                         'start': 0, 
-                        'loop': 0 // WYŁĄCZONA pętla, żeby wykryć koniec
+                        'loop': 0 // Ważne: pętla wyłączona, żeby wykryć koniec
                     },
                     events: {
                         'onReady': function(event) {
                             event.target.setVolume(25); 
                             event.target.playVideo();
                         },
-                        // Funkcja wykrywająca zmianę stanu (np. koniec filmu)
                         'onStateChange': function(event) {
-                            // Stan 0 oznacza "KONIEC FILMU"
+                            // Stan 0 oznacza KONIEC FILMU
                             if (event.data === 0) {
-                                // Ładujemy drugą piosenkę: The Weeknd - Save Your Tears
-                                event.target.loadVideoById('-0QiCWGmBcw');
-                                // Druga piosenka będzie się już zapętlać
+                                currentSongIndex++; // Następna piosenka
+                                
+                                // Jeśli doszliśmy do końca listy, wracamy na początek (0)
+                                if (currentSongIndex >= playlist.length) {
+                                    currentSongIndex = 0;
+                                }
+                                
+                                // Ładujemy i odtwarzamy nową piosenkę
+                                event.target.loadVideoById(playlist[currentSongIndex]);
                             }
                         }
                     }
