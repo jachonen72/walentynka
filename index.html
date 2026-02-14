@@ -31,19 +31,19 @@
         h1 {
             font-family: 'Pacifico', cursive;
             color: #ffffff;
-            font-size: 3rem;
-            margin-bottom: 50px;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
             text-shadow: 0 5px 15px rgba(168, 50, 50, 0.4);
             font-weight: normal;
             line-height: 1.4;
+            transition: all 0.5s ease;
         }
 
-        /* --- TU JEST ZMIANA: Flexbox trzyma przyciski razem --- */
         .buttons {
             display: flex;
-            justify-content: center; /* Idealnie na środku */
+            justify-content: center;
             align-items: center;
-            gap: 20px; /* Stały odstęp 20 pikseli między przyciskami */
+            gap: 20px;
             min-height: 80px;
         }
 
@@ -57,7 +57,7 @@
             cursor: pointer;
             font-weight: 600;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            transition: transform 0.2s; /* Usunąłem transition dla left/top, żeby nie było opóźnienia przy starcie ucieczki */
+            transition: transform 0.2s, background-color 0.3s; 
             letter-spacing: 1px;
             text-transform: uppercase;
         }
@@ -66,18 +66,21 @@
             transform: scale(0.95);
         }
 
-        #yesBtn {
+        .btn-white {
             background-color: #ffffff;
             color: #ff4757;
             z-index: 101;
         }
         
-        #noBtn {
+        .btn-red {
             background-color: #ff4757;
             color: #ffffff;
             border: 2px solid #ffffff;
             z-index: 100;
-            position: relative; /* Na starcie jest "zwykłym" przyciskiem */
+        }
+
+        #noBtnVal {
+            position: relative;
         }
 
         /* Pływające serduszka */
@@ -114,9 +117,15 @@
 
     <div class="container" id="mainContainer">
         <h1 id="mainTitle">Będziesz moją spóźnioną Walentynką? ❤️</h1>
-        <div class="buttons">
-            <button id="yesBtn" onclick="celebrate()">TAK!</button>
-            <button id="noBtn">NIE</button>
+        
+        <div class="buttons" id="stage1Buttons">
+            <button id="yesBtnVal" class="btn-white" onclick="goToStage2()">TAK!</button>
+            <button id="noBtnVal" class="btn-red">NIE</button>
+        </div>
+
+        <div class="buttons" id="stage2Buttons" style="display: none;">
+            <button class="btn-white" onclick="finishFries(true)">TAK!</button>
+            <button class="btn-red" onclick="finishFries(false)">NIE</button>
         </div>
     </div>
 
@@ -134,62 +143,81 @@
             document.body.appendChild(heart);
         }
 
-        const noBtn = document.getElementById('noBtn');
-        const yesBtn = document.getElementById('yesBtn');
-
-        // Zmienna sprawdzająca, czy przycisk już zaczął uciekać
+        const noBtnVal = document.getElementById('noBtnVal');
         let isRunning = false;
         let currentX = 0;
         let currentY = 0;
 
         document.addEventListener('mousemove', (e) => {
+            if (noBtnVal.offsetParent === null) return;
+
             const mouseX = e.clientX;
             const mouseY = e.clientY;
-            const btnRect = noBtn.getBoundingClientRect();
+            const btnRect = noBtnVal.getBoundingClientRect();
             const btnCenterX = btnRect.left + btnRect.width / 2;
             const btnCenterY = btnRect.top + btnRect.height / 2;
             const distance = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
 
-            // Jeśli myszka jest blisko (150px)
             if (distance < 150) {
-                // Jeśli to pierwszy raz, gdy myszka się zbliża:
                 if (!isRunning) {
                     isRunning = true;
-                    // Przełączamy przycisk w tryb absolutny w tym samym miejscu, w którym był
                     currentX = btnRect.left;
                     currentY = btnRect.top;
-                    noBtn.style.position = 'fixed'; // Używamy fixed, żeby łatwiej sterować
-                    noBtn.style.left = currentX + 'px';
-                    noBtn.style.top = currentY + 'px';
-                    // Dodajemy płynność ruchu dopiero TERAZ, żeby nie odleciał przy ładowaniu
-                    noBtn.style.transition = 'left 0.6s ease-out, top 0.6s ease-out';
+                    noBtnVal.style.position = 'fixed'; 
+                    noBtnVal.style.left = currentX + 'px';
+                    noBtnVal.style.top = currentY + 'px';
+                    noBtnVal.style.transition = 'left 0.6s ease-out, top 0.6s ease-out';
                 }
 
-                // Logika uciekania
                 const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
                 currentX += Math.cos(angle) * 300;
                 currentY += Math.sin(angle) * 300;
                 
-                // Odbijanie od ścian
                 if (currentX < 50) currentX = window.innerWidth - 200;
                 if (currentX > window.innerWidth - 100) currentX = 50;
                 if (currentY < 50) currentY = window.innerHeight - 100;
                 if (currentY > window.innerHeight - 50) currentY = 50;
 
-                noBtn.style.left = currentX + 'px';
-                noBtn.style.top = currentY + 'px';
+                noBtnVal.style.left = currentX + 'px';
+                noBtnVal.style.top = currentY + 'px';
             }
         });
 
-        function celebrate() {
+        function goToStage2() {
+            startMusic();
             const title = document.getElementById('mainTitle');
-            title.style.fontFamily = "'Pacifico', cursive";
-            title.innerHTML = "ale czad!! ❤️❤️❤️";
-            title.style.fontSize = "4.5rem";
-            
-            noBtn.style.display = 'none';
-            yesBtn.style.display = 'none';
+            const stage1 = document.getElementById('stage1Buttons');
+            const stage2 = document.getElementById('stage2Buttons');
 
+            stage1.style.display = 'none';
+            stage2.style.display = 'flex';
+            
+            title.innerHTML = "To fryteczki z Mc na pierwszą randkę czy to passé?? 🍟";
+        }
+
+        function finishFries(isYes) {
+            const title = document.getElementById('mainTitle');
+            const stage2 = document.getElementById('stage2Buttons');
+
+            // Ukrywamy przyciski
+            stage2.style.display = 'none';
+
+            if (isYes) {
+                // Wybrano FRYTKI (TAK)
+                title.innerHTML = "Wspaniale! ❤️<br>Widzimy się!";
+                title.style.fontSize = "4rem";
+            } else {
+                // Wybrano INNE JEDZENIE (NIE)
+                // Wyświetlamy tylko tekst, tak jak prosiłeś
+                title.innerHTML = "Jeżeli masz ochotę na coś innego,<br>to czekam na propozycje.<br>Przecież kontakt do mnie masz 😉";
+                title.style.fontSize = "2.5rem"; // Mniejsza czcionka, żeby tekst się zmieścił
+            }
+            
+            // W obu przypadkach odpalamy fajerwerki na koniec
+            triggerFireworks();
+        }
+
+        function startMusic() {
             if (typeof YT !== 'undefined' && YT && YT.Player) {
                 new YT.Player('youtube-player', {
                     height: '0',
@@ -198,7 +226,7 @@
                     playerVars: {
                         'autoplay': 1,
                         'controls': 0,
-                        'start': 3, // Start od 3 sekundy
+                        'start': 3,
                         'loop': 1
                     },
                     events: {
@@ -209,7 +237,9 @@
                     }
                 });
             }
+        }
 
+        function triggerFireworks() {
             for(let i=0; i<400; i++) {
                 setTimeout(createFirework, i * 8);
             }
