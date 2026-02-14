@@ -108,7 +108,7 @@
             box-shadow: 0 0 15px 3px rgba(255, 255, 255, 0.9);
         }
     </style>
-    <script src="https://www.youtube.com/watch?v=U-l4ya3ejko"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -207,7 +207,7 @@
             stage1.style.display = 'none';
             stage2.style.display = 'flex';
             
-            title.innerHTML = "To fryteczki z Mc na pierwszą randkę?? Chyba że to passé.... 🍟";
+            title.innerHTML = "To fryteczki z Mc na pierwszą randkę czy to passé?? 🍟";
         }
 
         function finishFries(isYes) {
@@ -220,7 +220,7 @@
                 title.innerHTML = "Wspaniale! ❤️<br>Widzimy się!";
                 title.style.fontSize = "4rem";
             } else {
-                title.innerHTML = "Jeżeli masz ochotę na coś innego,<br>to czekam na propozycje.<br>Wiesz gdzie mnie szukać 😉";
+                title.innerHTML = "Jeżeli masz ochotę na coś innego,<br>to czekam na propozycje.<br>Przecież kontakt do mnie masz 😉";
                 title.style.fontSize = "2.2rem";
             }
             triggerFireworks();
@@ -231,11 +231,11 @@
                 new YT.Player('youtube-player', {
                     height: '0',
                     width: '0',
-                    videoId: 'yo_Ph9GQjWw',
+                    videoId: 'U-l4ya3ejko', // NOWA PIOSENKA
                     playerVars: {
                         'autoplay': 1,
                         'controls': 0,
-                        'start': 3, // WRÓCILIŚMY DO 3 SEKUNDY
+                        'start': 0, // START OD POCZĄTKU (0s)
                         'loop': 1
                     },
                     events: {
