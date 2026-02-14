@@ -57,6 +57,7 @@
             cursor: pointer;
             font-weight: 600;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            /* Ważne: usuwamy domyślne transition dla left/top, sterujemy tym w JS */
             transition: transform 0.2s, background-color 0.3s; 
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -80,10 +81,28 @@
         }
 
         #noBtnVal {
-            position: relative;
+            position: relative; /* Na start grzecznie w rzędzie */
         }
 
-        /* Pływające serduszka */
+        #foodInputContainer {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #foodInput {
+            padding: 15px;
+            border-radius: 30px;
+            border: none;
+            width: 80%;
+            max-width: 300px;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
         .heart {
             position: absolute;
             color: #ffffff; 
@@ -143,40 +162,62 @@
             document.body.appendChild(heart);
         }
 
+        // --- ZMIENNE STERUJĄCE ---
         const noBtnVal = document.getElementById('noBtnVal');
+        let currentStage = 1; // 1 = Walentynka, 2 = Frytki
         let isRunning = false;
         let currentX = 0;
         let currentY = 0;
 
+        // --- LOGIKA UCIEKANIA (Tylko dla Etapu 1) ---
         document.addEventListener('mousemove', (e) => {
-            if (noBtnVal.offsetParent === null) return;
+            // Jeśli to nie jest etap 1, nic nie rób
+            if (currentStage !== 1) return;
 
             const mouseX = e.clientX;
             const mouseY = e.clientY;
+            
             const btnRect = noBtnVal.getBoundingClientRect();
             const btnCenterX = btnRect.left + btnRect.width / 2;
             const btnCenterY = btnRect.top + btnRect.height / 2;
+            
             const distance = Math.hypot(mouseX - btnCenterX, mouseY - btnCenterY);
 
-            if (distance < 150) {
+            // Zwiększyłem zasięg do 200px dla pewności
+            if (distance < 200) {
                 if (!isRunning) {
+                    // Pierwsze uruchomienie ucieczki
                     isRunning = true;
                     currentX = btnRect.left;
                     currentY = btnRect.top;
+                    
                     noBtnVal.style.position = 'fixed'; 
                     noBtnVal.style.left = currentX + 'px';
                     noBtnVal.style.top = currentY + 'px';
-                    noBtnVal.style.transition = 'left 0.6s ease-out, top 0.6s ease-out';
+                    noBtnVal.style.zIndex = '1000'; // Zawsze na wierzchu
+                    // Płynność ruchu
+                    noBtnVal.style.transition = 'left 0.4s ease-out, top 0.4s ease-out';
                 }
 
                 const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
-                currentX += Math.cos(angle) * 300;
-                currentY += Math.sin(angle) * 300;
+                const moveDist = 300; // Skok ucieczki
                 
-                if (currentX < 50) currentX = window.innerWidth - 200;
-                if (currentX > window.innerWidth - 100) currentX = 50;
-                if (currentY < 50) currentY = window.innerHeight - 100;
-                if (currentY > window.innerHeight - 50) currentY = 50;
+                currentX += Math.cos(angle) * moveDist;
+                currentY += Math.sin(angle) * moveDist;
+                
+                // --- ODBIJANIE OD ŚCIAN (Poprawione) ---
+                const margin = 50;
+                const maxX = window.innerWidth - margin - noBtnVal.offsetWidth;
+                const maxY = window.innerHeight - margin - noBtnVal.offsetHeight;
+
+                // Jeśli wyleci w lewo -> przenieś na prawo
+                if (currentX < margin) currentX = maxX - 50;
+                // Jeśli wyleci w prawo -> przenieś na lewo
+                if (currentX > maxX) currentX = margin + 50;
+                // Jeśli wyleci w górę -> przenieś na dół
+                if (currentY < margin) currentY = maxY - 50;
+                // Jeśli wyleci w dół -> przenieś na górę
+                if (currentY > maxY) currentY = margin + 50;
 
                 noBtnVal.style.left = currentX + 'px';
                 noBtnVal.style.top = currentY + 'px';
@@ -185,6 +226,8 @@
 
         function goToStage2() {
             startMusic();
+            currentStage = 2; // Zmieniamy etap - przycisk przestaje uciekać
+            
             const title = document.getElementById('mainTitle');
             const stage1 = document.getElementById('stage1Buttons');
             const stage2 = document.getElementById('stage2Buttons');
@@ -199,21 +242,15 @@
             const title = document.getElementById('mainTitle');
             const stage2 = document.getElementById('stage2Buttons');
 
-            // Ukrywamy przyciski
             stage2.style.display = 'none';
 
             if (isYes) {
-                // Wybrano FRYTKI (TAK)
                 title.innerHTML = "Wspaniale! ❤️<br>Widzimy się!";
                 title.style.fontSize = "4rem";
             } else {
-                // Wybrano INNE JEDZENIE (NIE)
-                // Wyświetlamy tylko tekst, tak jak prosiłeś
                 title.innerHTML = "Jeżeli masz ochotę na coś innego,<br>to czekam na propozycje.<br>Przecież kontakt do mnie masz 😉";
-                title.style.fontSize = "2.5rem"; // Mniejsza czcionka, żeby tekst się zmieścił
+                title.style.fontSize = "2.2rem";
             }
-            
-            // W obu przypadkach odpalamy fajerwerki na koniec
             triggerFireworks();
         }
 
