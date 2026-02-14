@@ -113,7 +113,7 @@
     <div id="youtube-player" style="position:absolute; top:-9999px; left:-9999px;"></div>
 
     <div class="container" id="mainContainer">
-        <h1 id="mainTitle">Będziesz moją Walentynką,<br>jak wyzdrowiejesz? ❤️</h1>
+        <h1 id="mainTitle">Będziesz moją spóźnioną Walentynką,<br>po tym wszystkim? ❤️</h1>
         <div class="buttons">
             <button id="yesBtn" onclick="celebrate()">TAK!</button>
             <button id="noBtn">NIE</button>
@@ -162,7 +162,7 @@
                     noBtn.style.left = currentX + 'px';
                     noBtn.style.top = currentY + 'px';
                     // Dodajemy płynność ruchu dopiero TERAZ, żeby nie odleciał przy ładowaniu
-                    noBtn.style.transition = 'left 0.8s ease-out, top 0.8s ease-out';
+                    noBtn.style.transition = 'left 0.6s ease-out, top 0.6s ease-out';
                 }
 
                 // Logika uciekania
@@ -184,7 +184,7 @@
         function celebrate() {
             const title = document.getElementById('mainTitle');
             title.style.fontFamily = "'Pacifico', cursive";
-            title.innerHTML = "Oł jeeaa! ❤️";
+            title.innerHTML = "Ale czad!! ❤️❤️❤️";
             title.style.fontSize = "4.5rem";
             
             noBtn.style.display = 'none';
